@@ -146,19 +146,19 @@
                     bridge.advertisement.on('rewarded_state_changed', state => sendMessageToUnity('OnRewardedStateChanged', state))
                     bridge.game.on('visibility_state_changed', state => sendMessageToUnity('OnVisibilityStateChanged', state))
 
-                    if (bridge.platform.id === bridge.PLATFORM_ID.YANDEX || bridge.platform.id === bridge.PLATFORM_ID.GAME_DISTRIBUTION) {
+                    if (bridge.platform.id === bridge.PLATFORM_ID.GAME_DISTRIBUTION) {
                         bridge.advertisement.showInterstitial()
                     }
 
                     let unityLoader = document.createElement('script')
-                    unityLoader.src = 'Build/bb0d9ecdb05db3e84da20bd14a4f84dc.loader.js'
+                    unityLoader.src = 'Build/9853637125e801e9aae48e78dbbdcfca.loader.js'
                     unityLoader.onload = () => {
                         createUnityInstance(
                             canvas,
                             {
-                                dataUrl: 'Build/96184046b04d8014044e4c834c93b7ab.data.br',
-                                frameworkUrl: 'Build/5068da387bec113938389d916dd91b66.framework.js.br',
-                                codeUrl: 'Build/7923438868028abe9643b07c41ae3037.wasm.br',
+                                dataUrl: 'Build/683dd84e462c3862145c4935a27a5da3.data.unityweb',
+                                frameworkUrl: 'Build/c68d36b4d3ec1df71b3c0cb5c26bb9dc.framework.js.unityweb',
+                                codeUrl: 'Build/e4932c4dc762ef33983987c9c7cabc56.wasm.unityweb',
                                 streamingAssetsUrl: 'StreamingAssets',
                                 companyName: 'GameGULF',
                                 productName: 'Wood Nuts Master Screw Puzzle',
@@ -299,7 +299,7 @@
             window.getStorageData = function(key, storageType) {
                 let keys = key.split(STORAGE_KEYS_SEPARATOR)
 
-                bridge.storage.get(keys, storageType)
+                bridge.storage.get(keys, storageType, false)
                     .then(data => {
                         if (keys.length > 1) {
                             let values = []
@@ -616,11 +616,7 @@
                 bridge.leaderboard.getEntries(options)
                     .then(data => {
                         if (data) {
-                            if (typeof data !== 'string') {
-                                data = JSON.stringify(data)
-                            }
-
-                            sendMessageToUnity('OnLeaderboardGetEntriesCompletedSuccess', data)
+                            sendMessageToUnity('OnLeaderboardGetEntriesCompletedSuccess', JSON.stringify(data))
                         } else {
                             sendMessageToUnity('OnLeaderboardGetEntriesCompletedSuccess', '')
                         }
@@ -684,8 +680,6 @@
                                 data = JSON.stringify(data)
                             }
 
-                            data = data.replaceAll('imageURI', 'icon')
-
                             sendMessageToUnity('OnPaymentsGetCatalogCompletedSuccess', data)
                         } else {
                             sendMessageToUnity('OnPaymentsGetCatalogCompletedSuccess', '')
@@ -703,9 +697,6 @@
                             if (typeof data !== 'string') {
                                 data = JSON.stringify(data)
                             }
-
-                            data = data.replaceAll('productID', 'id')
-                            data = data.replaceAll('purchaseToken', 'token')
 
                             sendMessageToUnity('OnPaymentsGetPurchasesCompletedSuccess', data)
                         } else {
@@ -728,16 +719,11 @@
 
                 bridge.remoteConfig.get(options)
                     .then(data => {
-                        let keys = Object.keys(data)
-                        let values = []
-
-                        for (let i = 0; i < keys.length; i++) {
-                            let name = keys[i]
-                            let value = data[name]
-                            values.push({ name, value })
+                        if (typeof data !== 'string') {
+                            data = JSON.stringify(data)
                         }
-
-                        sendMessageToUnity('OnRemoteConfigGetSuccess', JSON.stringify(values))
+                        
+                        sendMessageToUnity('OnRemoteConfigGetSuccess', data)
                     })
                     .catch(error => {
                         sendMessageToUnity('OnRemoteConfigGetFailed', '')
